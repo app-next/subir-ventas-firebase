@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subir Ventas a Firebase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+      color: #333;
+    }
+    h1 {
+      color: #202020;
+    }
+    .log {
+      white-space: pre-wrap;
+      background: #000;
+      color: #0f0;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>📤 Cargar ventas a Firebase (modo seguro)</h1>
+  <p>Selecciona el archivo <strong>ventas_firebase_import.json</strong> generado previamente.</p>
+  <input type="file" id="jsonFile" accept=".json" />
+  <button onclick="subirDatos()">Subir datos</button>
+
+  <div class="log" id="log"></div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-Ls632iFhncM7iqfOvJisRKL2xb_xyQo",
+      authDomain: "next-app05.firebaseapp.com",
+      projectId: "next-app05",
+      storageBucket: "next-app05.appspot.com",
+      messagingSenderId: "138210783252",
+      appId: "1:138210783252:web:7792989863844d40507701",
+      measurementId: "G-X9Q7QRZSFN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.subirDatos = async function () {
+      const archivo = document.getElementById("jsonFile").files[0];
+      const log = document.getElementById("log");
+      log.textContent = "📁 Leyendo archivo...";
+
+      if (!archivo) {
+        log.textContent = "❌ No se seleccionó ningún archivo.";
+        return;
+      }
+
+      try {
+        const texto = await archivo.text();
+        const datos = JSON.parse(texto);
+
+        log.textContent += "\n✅ Archivo cargado correctamente. Subiendo a Firebase...";
+
+        for (const doc of datos) {
+          await addDoc(collection(db, "ventas"), doc);
+        }
+
+        log.textContent += "\n✅ Todos los datos fueron subidos correctamente.";
+      } catch (err) {
+        log.textContent += "\n❌ Error: " + err.message;
+      }
+    };
+  </script>
+</body>
+</html>
